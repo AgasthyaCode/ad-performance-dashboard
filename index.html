@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cross-Channel Ad Performance — Jan 2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF7F0; --panel:#FFFFFF; --ink:#1B1A17; --muted:#76726A;
+    --hair:#E7E0D1; --hair2:#F0EADD;
+    --fb:#2F5FE0; --gg:#D99A2B; --tt:#14B8A6;
+    --good:#2E7D5B; --bad:#C4502E; --accent:#C4502E;
+    --shadow:0 1px 2px rgba(27,26,23,.04),0 8px 24px rgba(27,26,23,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-font-smoothing:antialiased}
+  body{background:var(--paper);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;
+    line-height:1.45;padding:32px 24px 64px}
+  .wrap{max-width:1180px;margin:0 auto}
+  .num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+
+  /* header */
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;
+    padding-bottom:20px;border-bottom:2px solid var(--ink);margin-bottom:28px;flex-wrap:wrap}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:8px}
+  h1{font-size:34px}
+  header .sub{color:var(--muted);font-size:14px;margin-top:6px}
+  .legend{display:flex;gap:16px;font-size:12.5px;font-weight:500}
+  .legend span{display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+  /* kpi strip */
+  .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:14px}
+  .kpi{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+  .kpi .lab{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .kpi .val{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-top:8px}
+  .kpi .meta{font-size:12px;color:var(--muted);margin-top:3px}
+
+  /* grid */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:1.15fr .85fr}
+  .g2b{grid-template-columns:1fr 1fr}
+  .card{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow)}
+  .card h3{font-size:18px;margin-bottom:3px}
+  .card .desc{font-size:12.5px;color:var(--muted);margin-bottom:16px;max-width:62ch}
+  .mt14{margin-top:14px}
+
+  /* paired bars (spend vs conv) */
+  .pair{margin-bottom:16px}
+  .pair:last-child{margin-bottom:0}
+  .pair .name{display:flex;align-items:center;gap:7px;font-weight:600;font-size:13.5px;margin-bottom:7px}
+  .barrow{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+  .barrow .tag{width:74px;font-size:11px;color:var(--muted);font-weight:500;flex:none}
+  .track{flex:1;background:var(--hair2);border-radius:5px;height:18px;position:relative;overflow:hidden}
+  .fill{height:100%;border-radius:5px;transition:width 1s cubic-bezier(.2,.7,.2,1)}
+  .barrow .pct{width:46px;text-align:right;font-size:12.5px;font-weight:600}
+  .gap-note{font-size:11.5px;margin-top:4px;font-weight:600}
+
+  /* cpa bars */
+  .cpabar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .cpabar .nm{width:80px;font-size:13px;font-weight:600;flex:none;display:flex;align-items:center;gap:6px}
+  .cpabar .tr{flex:1;background:var(--hair2);border-radius:6px;height:30px;overflow:hidden}
+  .cpabar .fl{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;
+    padding-right:10px;color:#fff;font-weight:700;font-size:13px;transition:width 1s cubic-bezier(.2,.7,.2,1)}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--hair2)}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  th:first-child,td:first-child{text-align:left}
+  tbody tr:last-child td{border-bottom:none}
+  td.ch{font-weight:600;display:flex;align-items:center;gap:7px}
+  .best{color:var(--good);font-weight:700}
+  .worst{color:var(--bad);font-weight:700}
+  tfoot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700;padding-top:10px;color:var(--muted)}
+
+  /* trend svg */
+  .chartbox{width:100%}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .axlab{font-size:10px;fill:var(--muted);font-family:'Archivo',sans-serif}
+
+  /* roas + funnel */
+  .roas-big{font-family:'Fraunces',serif;font-size:52px;font-weight:600;color:var(--gg);line-height:1}
+  .stat-row{display:flex;gap:28px;margin-top:14px}
+  .stat-row .s .l{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  .stat-row .s .v{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-top:3px}
+  .fence{font-size:11px;font-weight:600;color:var(--gg);background:#FBF1DC;border:1px solid #F0DCAE;
+    border-radius:6px;padding:3px 9px;display:inline-block;margin-bottom:14px}
+  .fence.tt{color:#0E8F82;background:#E2F6F3;border-color:#BFEAE3}
+
+  .fnl{margin-bottom:9px}
+  .fnl .lab{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+  .fnl .lab .r{color:var(--muted);font-weight:500}
+  .fnl .tr{background:var(--hair2);border-radius:5px;height:22px;overflow:hidden}
+  .fnl .fl{height:100%;background:var(--tt);border-radius:5px;transition:width 1s}
+
+  /* recommendation */
+  .rec{background:var(--ink);color:#F4F0E6;border-radius:14px;padding:26px 28px;margin-top:14px}
+  .rec .eyebrow{color:#E8A857}
+  .rec h2{color:#fff;font-size:22px;margin-bottom:14px}
+  .rec p{font-size:14px;color:#CFC9BC;margin-bottom:10px;max-width:90ch}
+  .rec strong{color:#fff;font-weight:600}
+  .rec .caveat{font-size:12.5px;color:#9A958A;border-top:1px solid #34322C;padding-top:12px;margin-top:14px}
+
+  footer{margin-top:22px;font-size:11.5px;color:var(--muted);line-height:1.7}
+  footer b{color:var(--ink);font-weight:600}
+
+  @media(max-width:920px){
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .g2,.g2b{grid-template-columns:1fr}
+    h1{font-size:27px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">Marketing Performance · Paid Media</div>
+      <h1>Cross-Channel Advertising Dashboard</h1>
+      <div class="sub">Facebook · Google · TikTok &nbsp;|&nbsp; 1–30 Jan 2024 &nbsp;|&nbsp; 330 campaign-days unified</div>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--fb)"></i>Facebook</span>
+      <span><i class="dot" style="background:var(--gg)"></i>Google</span>
+      <span><i class="dot" style="background:var(--tt)"></i>TikTok</span>
+    </div>
+  </header>
+
+  <!-- KPI STRIP -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- ROW 1: allocation story + cpa -->
+  <div class="grid g2 mt14">
+    <div class="card">
+      <h3>Budget allocation vs. results</h3>
+      <div class="desc">Where the money goes (spend share) vs. where conversions come from (conversion share). A channel earning a larger slice of conversions than spend is punching above its weight.</div>
+      <div id="pairs"></div>
+    </div>
+    <div class="card">
+      <h3>Cost per conversion (CPA)</h3>
+      <div class="desc">The only efficiency metric comparable across all three channels. Lower is better. <em>(ROAS excluded here — see note below right.)</em></div>
+      <div id="cpa" class="mt14"></div>
+    </div>
+  </div>
+
+  <!-- ROW 2: trend -->
+  <div class="grid mt14">
+    <div class="card">
+      <h3>Daily spend by channel</h3>
+      <div class="desc">30-day trend. All channels scale up together mid-month — a coordinated budget ramp, not an organic shift in mix.</div>
+      <div class="chartbox" id="trend"></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: table -->
+  <div class="grid mt14">
+    <div class="card">
+      <h3>Channel scorecard</h3>
+      <div class="desc">All rates recomputed from raw impressions / clicks / cost / conversions — platform-supplied CTR/CPC columns were discarded so every channel is measured identically.</div>
+      <table id="scoretable"></table>
+    </div>
+  </div>
+
+  <!-- ROW 4: roas + funnel (fenced single-platform panels) -->
+  <div class="grid g2b mt14">
+    <div class="card">
+      <span class="fence">⚠ Google only — sole channel reporting revenue</span>
+      <h3>Return on ad spend</h3>
+      <div class="desc">Facebook &amp; TikTok files contain no revenue field, so cross-channel ROAS is not computable and is deliberately not shown.</div>
+      <div class="roas-big num" id="roasbig"></div>
+      <div class="stat-row" id="roasstats"></div>
+    </div>
+    <div class="card">
+      <span class="fence tt">TikTok only — video completion funnel</span>
+      <h3>Video watch-through</h3>
+      <div class="desc">Share of video views reaching each quartile. Useful for creative quality, not comparable to other channels.</div>
+      <div id="funnel" class="mt14"></div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATION -->
+  <div class="rec">
+    <div class="eyebrow">So what — the recommendation</div>
+    <h2>Test a budget shift from TikTok toward Facebook</h2>
+    <p><strong>Facebook is the efficiency leader yet the smallest budget:</strong> 14% of spend, ~18% of conversions, and the lowest CPA at <span class="num">$7.64</span> — about 30% cheaper per conversion than TikTok.</p>
+    <p><strong>TikTok is the opposite:</strong> 57% of spend and the highest CPA at <span class="num">$11.00</span>, while contributing a smaller conversion share than its spend share. A directional move of ~10–15% of TikTok budget into Facebook (and Google, the proven-revenue channel at 5.6× ROAS) should lower blended CPA — worth A/B testing, not a wholesale reallocation.</p>
+    <div class="caveat"><strong style="color:#C9A06A">One honest caveat:</strong> CPA optimization assumes every conversion is worth the same. Only Google reports revenue, so we cannot confirm TikTok's conversions aren't higher-value. And this is 30 days of one month — directional, not seasonal. Validate conversion value before reallocating heavily.</div>
+  </div>
+
+  <footer id="foot"></footer>
+
+</div>
+
+<script>
+const DATA = {"meta": {"date_min": "2024-01-01", "date_max": "2024-01-30", "rows": 330, "gaps": [["Facebook", 120, 110, 10], ["Google", 120, 110, 10], ["TikTok", 120, 110, 10]]}, "totals": {"impressions": 40473185, "clicks": 688333, "cost": 130244.9, "conversions": 13363, "ctr": 1.7, "cpc": 0.19, "cpm": 3.22, "cpa": 9.75, "cvr": 1.94}, "by_platform": {"Facebook": {"impressions": 4541474, "clicks": 88899, "cost": 18292.0, "conversions": 2395, "ctr": 1.96, "cpc": 0.21, "cpm": 4.03, "cpa": 7.64, "cvr": 2.69, "spend_share": 14.0, "conv_share": 17.9}, "Google": {"impressions": 7223544, "clicks": 137590, "cost": 37686.2, "conversions": 4218, "ctr": 1.9, "cpc": 0.27, "cpm": 5.22, "cpa": 8.93, "cvr": 3.07, "spend_share": 28.9, "conv_share": 31.6}, "TikTok": {"impressions": 28708167, "clicks": 461844, "cost": 74266.7, "conversions": 6750, "ctr": 1.61, "cpc": 0.16, "cpm": 2.59, "cpa": 11.0, "cvr": 1.46, "spend_share": 57.0, "conv_share": 50.5}}, "trend": {"2024-01-01": {"Facebook": {"cost": 533.2, "conversions": 69}, "Google": {"cost": 1225.9, "conversions": 135}, "TikTok": {"cost": 1481.2, "conversions": 124}}, "2024-01-02": {"Facebook": {"cost": 554.0, "conversions": 73}, "Google": {"cost": 1225.6, "conversions": 140}, "TikTok": {"cost": 1552.4, "conversions": 132}}, "2024-01-03": {"Facebook": {"cost": 546.9, "conversions": 73}, "Google": {"cost": 960.3, "conversions": 79}, "TikTok": {"cost": 1948.0, "conversions": 183}}, "2024-01-04": {"Facebook": {"cost": 477.4, "conversions": 62}, "Google": {"cost": 803.5, "conversions": 129}, "TikTok": {"cost": 1810.2, "conversions": 159}}, "2024-01-05": {"Facebook": {"cost": 446.3, "conversions": 55}, "Google": {"cost": 953.1, "conversions": 83}, "TikTok": {"cost": 2050.9, "conversions": 194}}, "2024-01-06": {"Facebook": {"cost": 412.4, "conversions": 40}, "Google": {"cost": 806.5, "conversions": 129}, "TikTok": {"cost": 1856.8, "conversions": 163}}, "2024-01-07": {"Facebook": {"cost": 591.6, "conversions": 83}, "Google": {"cost": 1265.6, "conversions": 142}, "TikTok": {"cost": 1681.2, "conversions": 143}}, "2024-01-08": {"Facebook": {"cost": 446.1, "conversions": 56}, "Google": {"cost": 972.8, "conversions": 80}, "TikTok": {"cost": 2087.7, "conversions": 199}}, "2024-01-09": {"Facebook": {"cost": 435.1, "conversions": 47}, "Google": {"cost": 817.7, "conversions": 131}, "TikTok": {"cost": 1961.0, "conversions": 173}}, "2024-01-10": {"Facebook": {"cost": 596.5, "conversions": 84}, "Google": {"cost": 1239.0, "conversions": 135}, "TikTok": {"cost": 1674.9, "conversions": 144}}, "2024-01-11": {"Facebook": {"cost": 732.3, "conversions": 100}, "Google": {"cost": 1464.0, "conversions": 164}, "TikTok": {"cost": 2816.1, "conversions": 260}}, "2024-01-12": {"Facebook": {"cost": 689.2, "conversions": 89}, "Google": {"cost": 1407.2, "conversions": 153}, "TikTok": {"cost": 2709.3, "conversions": 246}}, "2024-01-13": {"Facebook": {"cost": 588.8, "conversions": 72}, "Google": {"cost": 1248.7, "conversions": 136}, "TikTok": {"cost": 2466.9, "conversions": 225}}, "2024-01-14": {"Facebook": {"cost": 553.3, "conversions": 65}, "Google": {"cost": 1197.9, "conversions": 129}, "TikTok": {"cost": 2386.4, "conversions": 216}}, "2024-01-15": {"Facebook": {"cost": 637.9, "conversions": 82}, "Google": {"cost": 1334.9, "conversions": 146}, "TikTok": {"cost": 2560.1, "conversions": 233}}, "2024-01-16": {"Facebook": {"cost": 705.2, "conversions": 95}, "Google": {"cost": 1408.1, "conversions": 158}, "TikTok": {"cost": 2893.6, "conversions": 266}}, "2024-01-17": {"Facebook": {"cost": 748.3, "conversions": 105}, "Google": {"cost": 1471.6, "conversions": 166}, "TikTok": {"cost": 3048.2, "conversions": 280}}, "2024-01-18": {"Facebook": {"cost": 715.2, "conversions": 97}, "Google": {"cost": 1431.4, "conversions": 160}, "TikTok": {"cost": 2959.3, "conversions": 271}}, "2024-01-19": {"Facebook": {"cost": 673.5, "conversions": 89}, "Google": {"cost": 1374.4, "conversions": 151}, "TikTok": {"cost": 2826.1, "conversions": 258}}, "2024-01-20": {"Facebook": {"cost": 598.8, "conversions": 76}, "Google": {"cost": 1234.0, "conversions": 133}, "TikTok": {"cost": 2607.2, "conversions": 238}}, "2024-01-21": {"Facebook": {"cost": 544.8, "conversions": 68}, "Google": {"cost": 1188.1, "conversions": 128}, "TikTok": {"cost": 2422.5, "conversions": 221}}, "2024-01-22": {"Facebook": {"cost": 618.6, "conversions": 81}, "Google": {"cost": 1324.0, "conversions": 146}, "TikTok": {"cost": 2731.5, "conversions": 246}}, "2024-01-23": {"Facebook": {"cost": 674.0, "conversions": 88}, "Google": {"cost": 1401.0, "conversions": 158}, "TikTok": {"cost": 2893.6, "conversions": 266}}, "2024-01-24": {"Facebook": {"cost": 725.0, "conversions": 99}, "Google": {"cost": 1481.3, "conversions": 169}, "TikTok": {"cost": 3171.7, "conversions": 290}}, "2024-01-25": {"Facebook": {"cost": 763.1, "conversions": 107}, "Google": {"cost": 1529.5, "conversions": 176}, "TikTok": {"cost": 3258.8, "conversions": 298}}, "2024-01-26": {"Facebook": {"cost": 728.0, "conversions": 100}, "Google": {"cost": 1455.4, "conversions": 164}, "TikTok": {"cost": 3048.2, "conversions": 280}}, "2024-01-27": {"Facebook": {"cost": 626.9, "conversions": 83}, "Google": {"cost": 1398.7, "conversions": 155}, "TikTok": {"cost": 2826.1, "conversions": 258}}, "2024-01-28": {"Facebook": {"cost": 584.8, "conversions": 75}, "Google": {"cost": 1297.0, "conversions": 138}, "TikTok": {"cost": 2675.5, "conversions": 247}}, "2024-01-29": {"Facebook": {"cost": 657.3, "conversions": 88}, "Google": {"cost": 1363.4, "conversions": 149}, "TikTok": {"cost": 2893.6, "conversions": 266}}, "2024-01-30": {"Facebook": {"cost": 687.5, "conversions": 94}, "Google": {"cost": 1405.6, "conversions": 156}, "TikTok": {"cost": 2967.7, "conversions": 271}}}, "campaigns": [{"platform": "Google", "campaign": "Search_Brand_Terms", "cost": 7368.1, "conversions": 1445, "cpa": 5.1, "ctr": 5.22, "cvr": 3.74}, {"platform": "Facebook", "campaign": "Conversions_Retargeting", "cost": 6371.0, "conversions": 1070, "cpa": 5.95, "ctr": 4.63, "cvr": 6.26}, {"platform": "Google", "campaign": "Shopping_All_Products", "cost": 11416.7, "conversions": 1801, "cpa": 6.34, "ctr": 3.34, "cvr": 2.88}, {"platform": "Facebook", "campaign": "Traffic_Drive_Jan", "cost": 5574.1, "conversions": 741, "cpa": 7.52, "ctr": 3.68, "cvr": 2.03}, {"platform": "Facebook", "campaign": "Brand_Awareness_Q1", "cost": 4087.9, "conversions": 433, "cpa": 9.44, "ctr": 2.03, "cvr": 1.5}, {"platform": "Google", "campaign": "Display_Remarketing", "cost": 3352.5, "conversions": 345, "cpa": 9.72, "ctr": 0.36, "cvr": 2.79}, {"platform": "TikTok", "campaign": "Influencer_Collab", "cost": 26312.3, "conversions": 2653, "cpa": 9.92, "ctr": 1.62, "cvr": 1.55}, {"platform": "TikTok", "campaign": "Conversion_Focus", "cost": 20605.9, "conversions": 2061, "cpa": 10.0, "ctr": 1.91, "cvr": 2.71}, {"platform": "TikTok", "campaign": "Awareness_GenZ", "cost": 15640.0, "conversions": 1203, "cpa": 13.0, "ctr": 1.47, "cvr": 1.01}, {"platform": "TikTok", "campaign": "Traffic_Campaign", "cost": 11708.5, "conversions": 833, "cpa": 14.06, "ctr": 1.57, "cvr": 0.86}, {"platform": "Facebook", "campaign": "Video_Views_Campaign", "cost": 2259.0, "conversions": 151, "cpa": 14.96, "ctr": 0.36, "cvr": 2.39}, {"platform": "Google", "campaign": "Search_Generic_Terms", "cost": 15548.9, "conversions": 627, "cpa": 24.8, "ctr": 1.99, "cvr": 2.59}], "google_roas": {"revenue": 210900.0, "cost": 37686.2, "roas": 5.6}, "funnel": {"views": 23122559, "w25": 18086889, "w50": 13282329, "w75": 9184774, "w100": 6004867}};
+
+const COL = {Facebook:'var(--fb)', Google:'var(--gg)', TikTok:'var(--tt)'};
+const RAW = {Facebook:'#2F5FE0', Google:'#D99A2B', TikTok:'#14B8A6'};
+const order = ['Facebook','Google','TikTok'];
+const money = n => '$'+Math.round(n).toLocaleString();
+const moneyk = n => n>=1e6 ? '$'+(n/1e6).toFixed(1)+'M' : n>=1e3 ? '$'+(n/1e3).toFixed(1)+'K' : '$'+Math.round(n);
+const big = n => n>=1e6 ? (n/1e6).toFixed(1)+'M' : n>=1e3 ? (n/1e3).toFixed(0)+'K' : n;
+
+/* ---- KPIs ---- */
+const t = DATA.totals;
+const kpis = [
+  {lab:'Total Spend', val:moneyk(t.cost), meta:'across 3 channels'},
+  {lab:'Conversions', val:t.conversions.toLocaleString(), meta:'blended CPA '+money(t.cpa)},
+  {lab:'Impressions', val:big(t.impressions), meta:big(t.clicks)+' clicks'},
+  {lab:'Blended CTR', val:t.ctr+'%', meta:'CPC '+money(t.cpc)},
+  {lab:'Conv. Rate', val:t.cvr+'%', meta:'clicks → conversions'},
+];
+document.getElementById('kpis').innerHTML = kpis.map(k=>
+  `<div class="kpi"><div class="lab">${k.lab}</div><div class="val num">${k.val}</div><div class="meta num">${k.meta}</div></div>`).join('');
+
+/* ---- paired bars: spend share vs conv share ---- */
+const maxShare = Math.max(...order.map(p=>Math.max(DATA.by_platform[p].spend_share, DATA.by_platform[p].conv_share)));
+document.getElementById('pairs').innerHTML = order.map(p=>{
+  const d = DATA.by_platform[p];
+  const diff = +(d.conv_share - d.spend_share).toFixed(1);
+  const verdict = diff>0.5 ? `<span style="color:var(--good)">▲ over-delivering (+${diff}pt)</span>`
+               : diff<-0.5 ? `<span style="color:var(--bad)">▼ under-delivering (${diff}pt)</span>`
+               : `<span style="color:var(--muted)">≈ balanced</span>`;
+  const w = v => (v/maxShare*100).toFixed(1)+'%';
+  return `<div class="pair">
+    <div class="name"><i class="dot" style="background:${COL[p]}"></i>${p}</div>
+    <div class="barrow"><span class="tag">Spend</span><div class="track"><div class="fill" style="width:${w(d.spend_share)};background:${COL[p]};opacity:.45"></div></div><span class="pct num">${d.spend_share}%</span></div>
+    <div class="barrow"><span class="tag">Conversions</span><div class="track"><div class="fill" style="width:${w(d.conv_share)};background:${COL[p]}"></div></div><span class="pct num">${d.conv_share}%</span></div>
+    <div class="gap-note">${verdict}</div>
+  </div>`;
+}).join('');
+
+/* ---- CPA bars ---- */
+const cpas = order.map(p=>({p, cpa:DATA.by_platform[p].cpa}));
+const maxCpa = Math.max(...cpas.map(c=>c.cpa));
+const minCpa = Math.min(...cpas.map(c=>c.cpa));
+document.getElementById('cpa').innerHTML = cpas.map(c=>{
+  const cls = c.cpa===minCpa?'best':c.cpa===maxCpa?'worst':'';
+  const note = c.cpa===minCpa?' ✓ best':c.cpa===maxCpa?' ✗ worst':'';
+  return `<div class="cpabar">
+    <div class="nm"><i class="dot" style="background:${COL[c.p]}"></i>${c.p}</div>
+    <div class="tr"><div class="fl" style="width:${(c.cpa/maxCpa*100).toFixed(1)}%;background:${COL[c.p]}">${money(c.cpa)}</div></div>
+  </div><div style="font-size:11px;color:var(--muted);margin:-8px 0 12px 92px">${c.p}${note}</div>`;
+}).join('');
+
+/* ---- scorecard table ---- */
+const cols = [['Channel','ch'],['Spend','cost'],['Impr.','impressions'],['Clicks','clicks'],['CTR','ctr'],['CPC','cpc'],['CPM','cpm'],['CVR','cvr'],['CPA','cpa']];
+let thead = '<thead><tr>'+cols.map(c=>`<th>${c[0]}</th>`).join('')+'</tr></thead>';
+const fmt = {cost:moneyk, impressions:big, clicks:big, ctr:v=>v+'%', cpc:money, cpm:money, cvr:v=>v+'%', cpa:money};
+const cpaVals = order.map(p=>DATA.by_platform[p].cpa);
+let rows = order.map(p=>{
+  const d = DATA.by_platform[p];
+  const cpaCls = d.cpa===Math.min(...cpaVals)?'best':d.cpa===Math.max(...cpaVals)?'worst':'';
+  return '<tr>'+cols.map(c=>{
+    if(c[1]==='ch') return `<td class="ch"><i class="dot" style="background:${COL[p]}"></i>${p}</td>`;
+    const v = fmt[c[1]](d[c[1]]);
+    return `<td class="num ${c[1]==='cpa'?cpaCls:''}">${v}</td>`;
+  }).join('')+'</tr>';
+}).join('');
+let tfoot = '<tfoot><tr>'+cols.map(c=>{
+  if(c[1]==='ch') return '<td>All channels</td>';
+  return `<td class="num">${fmt[c[1]](t[c[1]])}</td>`;
+}).join('')+'</tr></tfoot>';
+document.getElementById('scoretable').innerHTML = thead+'<tbody>'+rows+'</tbody>'+tfoot;
+
+/* ---- trend line chart (pure SVG) ---- */
+(function(){
+  const dates = Object.keys(DATA.trend).sort();
+  const W=1080,H=300,pad={l:48,r:16,t:16,b:30};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  let maxY=0;
+  dates.forEach(d=>order.forEach(p=>{const v=DATA.trend[d][p]?.cost||0; if(v>maxY)maxY=v;}));
+  maxY=Math.ceil(maxY/500)*500;
+  const x=i=>pad.l+(i/(dates.length-1))*iw;
+  const y=v=>pad.t+ih-(v/maxY)*ih;
+  let g='';
+  // gridlines
+  for(let k=0;k<=4;k++){const gv=maxY*k/4;const gy=y(gv);
+    g+=`<line x1="${pad.l}" y1="${gy}" x2="${W-pad.r}" y2="${gy}" stroke="#F0EADD"/>`;
+    g+=`<text class="axlab" x="${pad.l-8}" y="${gy+3}" text-anchor="end">$${big(gv)}</text>`;}
+  // x labels (every 5 days)
+  dates.forEach((d,i)=>{ if(i%5===0||i===dates.length-1){
+    g+=`<text class="axlab" x="${x(i)}" y="${H-10}" text-anchor="middle">${d.slice(8)} Jan</text>`;}});
+  // lines
+  order.forEach(p=>{
+    const pts=dates.map((d,i)=>`${x(i)},${y(DATA.trend[d][p]?.cost||0)}`).join(' ');
+    g+=`<polyline fill="none" stroke="${RAW[p]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${pts}"/>`;
+    const li=dates.length-1;
+    g+=`<circle cx="${x(li)}" cy="${y(DATA.trend[dates[li]][p].cost)}" r="3.5" fill="${RAW[p]}"/>`;
+  });
+  document.getElementById('trend').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Daily spend by channel">${g}</svg>`;
+})();
+
+/* ---- ROAS ---- */
+const r = DATA.google_roas;
+document.getElementById('roasbig').textContent = r.roas+'×';
+document.getElementById('roasstats').innerHTML =
+  `<div class="s"><div class="l">Revenue</div><div class="v num">${moneyk(r.revenue)}</div></div>
+   <div class="s"><div class="l">Ad spend</div><div class="v num">${moneyk(r.cost)}</div></div>
+   <div class="s"><div class="l">Net return</div><div class="v num" style="color:var(--good)">${moneyk(r.revenue-r.cost)}</div></div>`;
+
+/* ---- funnel ---- */
+const f = DATA.funnel;
+const stages=[['Views',f.views],['25% watched',f.w25],['50% watched',f.w50],['75% watched',f.w75],['100% watched',f.w100]];
+document.getElementById('funnel').innerHTML = stages.map(s=>{
+  const pct=(s[1]/f.views*100);
+  return `<div class="fnl"><div class="lab"><span>${s[0]}</span><span class="r num">${big(s[1])} · ${pct.toFixed(0)}%</span></div>
+    <div class="tr"><div class="fl" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+}).join('');
+
+/* ---- footer ---- */
+const gaps = DATA.meta.gaps.reduce((a,g)=>a+g[3],0);
+document.getElementById('foot').innerHTML =
+  `<b>Methodology.</b> Three platform exports unified into one fact table (date · platform · campaign · ad group). The shared metric core — impressions, clicks, cost (Facebook's “spend” = Google/TikTok “cost”), conversions — is conformed; CTR, CPC, CPM, CPA and conversion rate are recomputed from raw counts so channels are directly comparable. Platform-supplied derived columns (Google CTR/CPC, Facebook engagement rate) were intentionally discarded.<br>
+  <b>Data quality.</b> ${DATA.meta.rows} rows · 4 campaigns × 30 days per channel. ${gaps} campaign-days are missing across the three files (10 each) — gaps left as-is, not imputed.<br>
+  <b>Known limits.</b> Revenue/ROAS exists for Google only; cross-channel ROAS is not shown. Video metrics differ by platform (TikTok has a quartile funnel, Facebook only total views) and are not compared. Single month — directional, not seasonal.`;
+</script>
+</body>
+</html>
